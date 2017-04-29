@@ -185,11 +185,11 @@ def parse_chord(in_str):
                             bass_l, is_nochord)
 
 
-ChordPitchStruct = namedtuple('ParsedChordLabel',
-                              ['root',
-                               'bass',
-                               'pitch_classes',
-                               'is_nochord'])
+ChordPitchClassStruct = namedtuple('ChordPitchClassStruct',
+                                   ['root',
+                                    'bass',
+                                    'pitch_classes',
+                                    'is_nochord'])
 
 
 def chord_to_pitch_classes_repr(in_str):
@@ -204,7 +204,7 @@ def chord_to_pitch_classes_repr(in_str):
     """
     c = parse_chord(in_str)
     if c.is_nochord:
-        return ChordPitchStruct(None, None, [], True)
+        return ChordPitchClassStruct(None, None, [], True)
 
     root_pc = note_to_pitchclass(c.root)
     st_sht = shorthand_to_semitones_list(c.shorthand)
@@ -224,4 +224,4 @@ def chord_to_pitch_classes_repr(in_str):
     for i in st_list_omit:
         pitch_classes.discard((root_pc + i) % 12)
 
-    return ChordPitchStruct(root_pc, bass_pc, list(pitch_classes), False)
+    return ChordPitchClassStruct(root_pc, bass_pc, list(pitch_classes), False)
