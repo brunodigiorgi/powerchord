@@ -1,30 +1,41 @@
 """
-[1] Harte, Christopher, et al. "Symbolic Representation of Musical Chords: A Proposed Syntax for Text Annotations." ISMIR. Vol. 5. 2005.
+[1] Harte, Christopher, et al. "Symbolic Representation of Musical Chords: A Proposed Syntax for Text Annotations." 
+    ISMIR. Vol. 5. 2005.
 """
 import re
 from collections import namedtuple
 import itertools
 
 
-def opt(x):  # optional
-    return x + r'?'
-
-
 def noncg(x):  # noncapturing group
     return r'(?:' + x + r')'
 
 
+def opt(x):  # optional
+    return noncg(x) + r'?'
+
+
+def nm(name, x):  # named group
+    return r'(?P<' + name + '>' + x + r')'
+
+
 # chord regex:
-rg_natural = r'[A-G]'
-rg_modifier = r'#*b*'
-rg_interval = r'1|2|3|4|5|6|7|8|9|10|11|12|13'
-rg_note = noncg(rg_natural + rg_modifier)
-rg_degree = noncg(rg_modifier + noncg(rg_interval))
+re_natural = r'[A-G]'
+re_modifier = r'#*b*'
+re_interval = r'1|2|3|4|5|6|7|8|9|10|11|12|13'
+re_note = noncg(re_natural + re_modifier)
+re_degree = noncg(re_modifier + noncg(re_interval))
 opt_deg = r'\*?'  # optional modifier for omitting a degree
-rg_degree_list = r'(?P<degree_list>\((?:' + opt_deg + rg_degree + r', ?)*' + opt_deg + rg_degree + r'\))'
-rg_shorthand = '(?P<shorthand>maj|min|dim|aug|maj7|min7|7|dim7|hdim7|minmaj7|maj6|min6|9|maj9|min9|sus4)'
-rg_root = r'(?P<root>' + rg_note + r')'
-rg_bass = r'(?:/(?P<bass>' + rg_degree + r'))'
+re_degree_list = nm('degree_list', '(?:' + opt_deg + re_degree + r', ?)*' + opt_deg + re_degree)
+re_shorthand = nm('shorthand', 'maj|min|dim|aug|maj7|min7|7|dim7|hdim7|minmaj7|maj6|min6|9|maj9|min9|sus4')
+re_root = nm('root', re_note)
+re_bass = nm('bass', re_degree)
+
+re_chord1 = re_root + r':' + re_shorthand + opt(r'\(' + re_degree_list + r'\)') + opt(r'/' + re_bass)
+re_chord2 = re_root + r':' + r'\(' + re_degree_list + r'\)' + opt(r'/' + re_bass)
+re_chord3 = re_root + opt(r'/' + re_bass)
+re_chord4 = r'N'
+chord = [re_chord1, re_chord2, re_chord3, re_chord4]
 
 NATURALS = {'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11}
 INTERVALS = {1: 0, 2: 2, 3: 4, 4: 5, 5: 7, 6: 9, 7: 11,
@@ -81,13 +92,6 @@ def shorthand_to_semitones_list(x):
     return SHORTHANDS[x]
 
 
-chord1 = rg_root + r':' + rg_shorthand + opt(rg_degree_list) + opt(rg_bass)
-chord2 = rg_root + r':' + rg_degree_list + opt(rg_bass)
-chord3 = rg_root + opt(rg_bass)
-chord4 = r'N'
-chord = [chord1, chord2, chord3, chord4]
-
-
 def match(in_str, pattern):
     s = in_str.lstrip(' ').rstrip(' ')
     m = re.fullmatch(pattern, s)
@@ -121,15 +125,15 @@ def chord_match(in_str):
 
 
 def is_note(in_str):
-    return is_match(in_str, rg_note)
+    return is_match(in_str, re_note)
 
 
 def is_degree(in_str):
-    return is_match(in_str, rg_degree)
+    return is_match(in_str, re_degree)
 
 
 def is_shorthand(in_str):
-    return is_match(in_str, rg_shorthand)
+    return is_match(in_str, re_shorthand)
 
 
 def parse_degree_list(in_str):
@@ -137,7 +141,6 @@ def parse_degree_list(in_str):
 
     if in_str is None:
         return [], []
-    in_str = in_str.replace('(', '').replace(')', '')
     dl = re.split(r' ?,', in_str)
     include_list = []
     omit_list = []
