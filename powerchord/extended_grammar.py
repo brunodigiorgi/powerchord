@@ -50,6 +50,12 @@ class ChordLabelExt:
 
 
 def unique_types(labels):
+    """
+    Extract chord types from all the given labels and list the unique types
+    
+    :param labels: list of chord labels 
+    :return: list of unique chord types
+    """
     types = set()
     for l in labels:
         t = ChordLabelExt(l).type
@@ -58,8 +64,21 @@ def unique_types(labels):
 
 
 def bass_to_degree(labels):
+    """
+    Change the chord labels having a note at the bass. The bass will be labeled with a scale degree e.g. b2, b6 etc.
+    
+    :param labels: list of chord labels 
+    :return: list of chord labels
+    """
     return [ChordLabelExt(l).bass_to_degree().label for l in labels]
 
 
 def map_types(labels, types_map):
+    """
+    Change the types of the given labels using the given types_map
+    
+    :param labels: list of chord labels 
+    :param types_map: dictionary with (input_type, output_type) 
+    :return: list of chord labels
+    """
     return [ChordLabelExt(l).map_type(types_map).label for l in labels]

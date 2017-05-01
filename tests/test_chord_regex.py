@@ -2,8 +2,8 @@ import powerchord
 
 
 def test_interval_to_degree():
-    note_pairs = [('A', 'C'), ('A', 'Cb'), ('G', 'C#'), ('G', 'Db'), ('Cb', 'G#')]
-    expected_results = ['b3', 'bb3', '#4', 'b5', '##5']
+    note_pairs = [('A', 'C'), ('A', 'Cb'), ('G', 'C#'), ('G', 'Db'), ('Cb', 'G#'), ('C#', 'E#')]
+    expected_results = ['b3', 'bb3', '#4', 'b5', '##5', '3']
     deg = [powerchord.chord_regex.interval_to_degree(np[0], np[1]) for np in note_pairs]
     for d, e in zip(deg, expected_results):
         assert(d == e)
