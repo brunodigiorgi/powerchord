@@ -35,7 +35,7 @@ re_chord1 = re_root + r':' + re_shorthand + opt(r'\(' + re_degree_list + r'\)') 
 re_chord2 = re_root + r':' + r'\(' + re_degree_list + r'\)' + opt(r'/' + re_bass)
 re_chord3 = re_root + opt(r'/' + re_bass)
 re_chord4 = r'N'
-chord = [re_chord1, re_chord2, re_chord3, re_chord4]
+re_chord_list = [re_chord1, re_chord2, re_chord3, re_chord4]
 
 NATURALS = {'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11}
 INTERVALS = {1: 0, 2: 2, 3: 4, 4: 5, 5: 7, 6: 9, 7: 11,
@@ -64,10 +64,14 @@ SHORTHANDS = {'maj': [0, 4, 7],
               }
 
 
+def remove_modifiers(x):
+    return x.replace('b', '').replace('#', '')
+
+
 def degree_to_semitones(x):
     if x is None:
         return None
-    interval_std = x.replace('b', '').replace('#', '')
+    interval_std = remove_modifiers(x)
     return INTERVALS[int(interval_std)] + x.count('#') - x.count('b')
 
 
@@ -77,10 +81,35 @@ def degree_list_to_semitones_list(x):
     return [degree_to_semitones(x_) for x_ in x]
 
 
+def interval_to_degree(note1, note2):
+    """
+    Returns the degree from note1 to note2, accounting for note names.
+    From 'A#' to 'F#' is a b6, not a #5
+    
+    :param note1: note label, e.g. 'Ab', 'C#', etc 
+    :param note2: note label
+    :return: degree, e.g. 'b3, #4', etc.
+    """
+    nat1 = remove_modifiers(note1)
+    nat2 = remove_modifiers(note2)
+    nat_degree = 1 + (ord(nat2) - ord(nat1)) % 7
+
+    pc1 = note_to_pitchclass(note1)
+    pc2 = note_to_pitchclass(note2)
+    semitones = (pc2 - pc1) % 12
+
+    distance = (semitones - INTERVALS[nat_degree])
+    if abs(distance) > 2:
+        raise Warning('the two notes %s and %s are not from the same scale' % (note1, note2))
+
+    mods = '#' * distance if distance > 0 else 'b' * abs(distance)
+    return mods + str(nat_degree)
+
+
 def note_to_pitchclass(x):
     if x is None:
         return None
-    x_nat = x.replace('b', '').replace('#', '')
+    x_nat = remove_modifiers(x)
     x = NATURALS[x_nat] + x.count('#') - x.count('b')
     x = x % 12
     return x
@@ -102,22 +131,22 @@ def is_match(in_str, pattern):
     return match(in_str, pattern) is not None
 
 
-def is_chord(in_str):
-    for c in chord:
+def is_chord(in_str, chord_patterns=re_chord_list):
+    for c in chord_patterns:
         if is_match(in_str, c):
             return True
     return False
 
 
-def chord_pattern(in_str):
-    for c in chord:
+def chord_pattern(in_str, chord_patterns=re_chord_list):
+    for c in chord_patterns:
         if is_match(in_str, c):
             return c
     raise ValueError('input is not recognized as a valid chord')
 
 
-def chord_match(in_str):
-    for c in chord:
+def chord_match(in_str, chord_patterns=re_chord_list):
+    for c in chord_patterns:
         m = match(in_str, c)
         if m is not None:
             return m

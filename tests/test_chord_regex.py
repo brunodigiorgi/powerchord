@@ -1,6 +1,14 @@
 import powerchord
 
 
+def test_interval_to_degree():
+    note_pairs = [('A', 'C'), ('A', 'Cb'), ('G', 'C#'), ('G', 'Db'), ('Cb', 'G#')]
+    expected_results = ['b3', 'bb3', '#4', 'b5', '##5']
+    deg = [powerchord.chord_regex.interval_to_degree(np[0], np[1]) for np in note_pairs]
+    for d, e in zip(deg, expected_results):
+        assert(d == e)
+
+
 def test_nochord():
     chord = 'N'
     c = powerchord.chord_regex.parse_chord(chord)
@@ -28,5 +36,6 @@ def test_chords_set():
     chords = json.load(open('./chords_set.json', 'r'))
     for c in chords:
         powerchord.chord_regex.parse_chord(c)
-        cpc = powerchord.chord_regex.chord_to_pitch_classes_repr(c)
-        print(c, cpc)
+        powerchord.chord_regex.chord_to_pitch_classes_repr(c)
+
+
