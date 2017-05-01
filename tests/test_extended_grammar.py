@@ -34,3 +34,16 @@ def test_map_types():
     new_labels = powerchord.extended_grammar.map_types(labels, types_map)
     for nl, er in zip(new_labels, expected_results):
         assert (nl == er)
+
+
+def test_for_readme():
+    labels = ['A/B', 'Amin/b3', 'N', 'Caug/G#']
+    unique_types = powerchord.unique_types(labels)
+    print(unique_types)
+
+    labels = powerchord.bass_to_degree(labels)
+    print(labels)
+
+    types_map = {'': ':maj', 'min': ':min', 'aug': ':aug'}
+    labels = powerchord.map_types(labels, types_map)
+    print(labels)

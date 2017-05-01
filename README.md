@@ -29,8 +29,18 @@ Parse chord label to pitch class representation:
 
 Extended grammar, for chord labels that do not comply with [1].
 
+    >>> labels = ['A/B', 'Ami/b3', 'N', 'Caug/G#']
     >>> unique_types = powerchord.unique_types(labels)
-    >>> new_labels = powerchord.bass_to_degree(labels)
-    >>> new_labels = powerchord.map_types(labels, types_map)
+    >>> unique_types
+    {'', None, 'mi', 'aug'}
+
+    >>> labels = powerchord.bass_to_degree(labels)
+    >>> labels
+    ['A/2', 'Ami/b3', 'N', 'Caug/#5']
+
+    >>> types_map = {'': ':maj', 'mi': ':min', 'aug': ':aug'}
+    >>> labels = powerchord.map_types(labels, types_map)
+    >>> labels
+    ['A:maj/2', 'A:min/b3', 'N', 'C:aug/#5']
 
 ParsedChordLabel and ChordPitchClassStruct are collections.namedtuple, therefore their attributes are available in autocompletion
